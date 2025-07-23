@@ -1,4 +1,4 @@
-import { getAllUsers, signUp } from "../services/db.services.js";
+import { getAllUsers, signUp, signIn } from "../services/db.services.js";
 
 export const getUsers = async (req, res) => {
     try {
@@ -10,9 +10,8 @@ export const getUsers = async (req, res) => {
     }
 }
 
-export const postUser = async (req, res) => {
+export const postSingUp = async (req, res) => {
     const { username, password_hash } = req.body;
-
     try {
         await signUp(username, password_hash)
 
@@ -20,5 +19,24 @@ export const postUser = async (req, res) => {
     } catch (err) {
         console.error('Error in postUser:', err);
         res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+export const postSingIn = async (req, res) => {
+    const { username, password_hash } = req.body;
+    try {
+        const user = await signIn(username, password_hash);
+        if (user === null) {
+            res.status(404).json({message: `User is null`});
+        }
+        if (user === false) {
+            res.status(401).json({message: `Password isn't correct`});
+        }
+        res.status(201).json({ message: `User sing in successfully` });
+    } catch (err) {
+        console.error('Error in postUser:', err);
+        if (!res.headersSent) {
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 }
